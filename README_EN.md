@@ -7,7 +7,7 @@ The component handles MiBeacon detection, bind-key lookup, AES-CCM authenticatio
 ## Dependencies
 
 - ESP-IDF 5.x
-- [esp32-platform-ble](https://github.com/lavrenovalexsandr-cmyk/esp32-platform-ble)
+- [esp32-platform-ble](https://github.com/lavrenovalexsandr-cmyk/esp32-component-ble)
 - ESP-IDF NVS and PSA Crypto
 
 ## Integration
@@ -67,7 +67,7 @@ Other available functions:
 
 The public API deliberately does not expose bind keys for reading. Keys are used internally for decryption.
 
-The registry is stored in the NVS namespace xiaomi. Its storage format is compatible with the tested implementation in [esp32_mqtt_xiaomi_lywsd03](https://github.com/lavrenovalexsandr-cmyk/esp32_mqtt_xiaomi_lywsd03).
+The registry is stored in the NVS namespace xiaomi. Its storage format is compatible with the tested implementation in [esp32_mqtt_xiaomi_lywsd03](https://github.com/lavrenovalexsandr-cmyk/esp32-firmware-xiaomi-lywsd03).
 
 ### Measurements
 
