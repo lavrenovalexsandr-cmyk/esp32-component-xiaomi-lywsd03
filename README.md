@@ -7,7 +7,7 @@ ESP-IDF-компонент для работы с BLE-датчиками Xiaomi 
 ## Зависимости
 
 - ESP-IDF 5.x
-- [esp32-platform-ble](https://github.com/lavrenovalexsandr-cmyk/esp32-platform-ble)
+- [esp32-platform-ble](https://github.com/lavrenovalexsandr-cmyk/esp32-component-ble)
 - NVS и PSA Crypto из ESP-IDF
 
 ## Подключение
@@ -67,7 +67,7 @@ bool added = xiaomi_lywsd03_add_sensor(mac, key);
 
 Публичный API намеренно не предоставляет чтение bind-key обратно. Ключ используется внутри компонента для расшифровки.
 
-Реестр хранится в NVS namespace xiaomi. Формат хранения совместим с проверенной реализацией из [esp32_mqtt_xiaomi_lywsd03](https://github.com/lavrenovalexsandr-cmyk/esp32_mqtt_xiaomi_lywsd03).
+Реестр хранится в NVS namespace xiaomi. Формат хранения совместим с проверенной реализацией из [esp32_mqtt_xiaomi_lywsd03](https://github.com/lavrenovalexsandr-cmyk/esp32-firmware-xiaomi-lywsd03).
 
 ### Измерения
 
