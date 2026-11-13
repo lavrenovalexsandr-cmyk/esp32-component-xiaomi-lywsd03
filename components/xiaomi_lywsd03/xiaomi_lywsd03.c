@@ -719,3 +719,22 @@ size_t xiaomi_lywsd03_sensor_count(void)
 {
     return xiaomi_registry_count();
 }
+
+bool xiaomi_lywsd03_get_sensor(
+    size_t index,
+    xiaomi_lywsd03_sensor_info_t *sensor)
+{
+    if (sensor == NULL) {
+        return false;
+    }
+
+    xiaomi_registry_entry_t entry;
+    if (!xiaomi_registry_get(index, &entry)) {
+        return false;
+    }
+
+    memcpy(sensor->mac, entry.mac, sizeof(sensor->mac));
+    memset(entry.key, 0, sizeof(entry.key));
+    return true;
+}
+
