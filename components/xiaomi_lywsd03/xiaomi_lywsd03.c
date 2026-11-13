@@ -477,7 +477,7 @@ static void parse_plaintext(
 /* Main parser                                                                */
 /* -------------------------------------------------------------------------- */
 
-bool xiaomi_lywsd03_parse(
+static bool xiaomi_lywsd03_parse(
         const platform_ble_adv_packet_t *packet,
         xiaomi_lywsd03_data_t *data)
 {
