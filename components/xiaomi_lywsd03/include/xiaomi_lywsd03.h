@@ -17,6 +17,10 @@ extern "C" {
 
 typedef struct {
     uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE];
+} xiaomi_lywsd03_sensor_info_t;
+
+typedef struct {
+    uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE];
     bool temperature_valid;
     bool humidity_valid;
     bool battery_valid;
@@ -25,7 +29,11 @@ typedef struct {
     uint8_t battery;
 } xiaomi_lywsd03_data_t;
 
-/** Called synchronously from process_adv() in BLE host callback context. */
+/**
+ * Called synchronously from xiaomi_lywsd03_process_adv().
+ * The callback runs in the context of the caller, which may be the BLE host
+ * callback. Keep it short and do not retain the data pointer after returning.
+ */
 typedef void (*xiaomi_lywsd03_data_callback_t)(
     const xiaomi_lywsd03_data_t *data,
     void *context);
@@ -58,15 +66,33 @@ bool xiaomi_lywsd03_get_info(
     const platform_ble_adv_packet_t *packet,
     uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE]);
 
-/** Registry operations. NVS must have been initialized and init succeeded. */
+/**
+ * Register a sensor or replace its bind key when the MAC already exists.
+ * MAC bytes use normal display order; bind key is exactly 16 bytes.
+ * Returns false if the registry is not initialized or the operation fails.
+ */
 bool xiaomi_lywsd03_add_sensor(
     const uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE],
     const uint8_t key[XIAOMI_LYWSD03_BIND_KEY_SIZE]);
+
+/** Remove a registered sensor. Returns false if it was not found or failed. */
 bool xiaomi_lywsd03_remove_sensor(
     const uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE]);
+
+/** Check whether a sensor has a registered bind key. */
 bool xiaomi_lywsd03_has_key(
     const uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE]);
+
+/** Return the number of registered sensors; returns 0 on registry error. */
 size_t xiaomi_lywsd03_sensor_count(void);
+
+/**
+ * Get public information about a registered sensor by zero-based index.
+ * Bind keys are deliberately not exposed through the public API.
+ */
+bool xiaomi_lywsd03_get_sensor(
+    size_t index,
+    xiaomi_lywsd03_sensor_info_t *sensor);
 
 #ifdef __cplusplus
 }
