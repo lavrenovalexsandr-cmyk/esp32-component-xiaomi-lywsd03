@@ -1,0 +1,15 @@
+idf_component_register(
+    SRCS
+        "xiaomi_lywsd03.c"
+        "xiaomi_registry.c"
+    INCLUDE_DIRS
+        "include"
+    PRIV_INCLUDE_DIRS
+        "src"
+    REQUIRES
+        platform_ble
+        nvs_flash
+    PRIV_REQUIRES
+        mbedtls
+        log
+)
