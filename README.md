@@ -63,7 +63,7 @@ xiaomi_lywsd03_result_t xiaomi_lywsd03_get_sensor_ex(
     size_t index, xiaomi_lywsd03_sensor_info_t *sensor);
 ```
 
-Возможные результаты: `OK`, `NOT_FOUND`, `ALREADY_EXISTS`, `FULL`, `INVALID_ARGUMENT`, `NOT_INITIALIZED`, `STORAGE_ERROR`.
+Возможные результаты: `OK`, `NOT_FOUND`, `ALREADY_EXISTS`, `FULL`, `INVALID_ARGUMENT`, `NOT_INITIALIZED`, `BUSY`, `STORAGE_ERROR`.
 
 **Добавление не заменяет существующий ключ.** Если MAC уже зарегистрирован, функция возвращает `ALREADY_EXISTS`. Для замены ключа приложение должно явно выполнить удаление, затем добавление. Это защищает от случайной перезаписи ключа при повторной доставке MQTT-команды.
 
