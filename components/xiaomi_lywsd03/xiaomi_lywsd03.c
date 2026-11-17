@@ -18,7 +18,17 @@ static void secure_zero(void *ptr, size_t len)
 
 static xiaomi_lywsd03_result_t map_registry_result(xiaomi_registry_result_t result)
 {
-    return (xiaomi_lywsd03_result_t)result;
+    switch (result) {
+        case XIAOMI_REGISTRY_OK: return XIAOMI_LYWSD03_OK;
+        case XIAOMI_REGISTRY_NOT_FOUND: return XIAOMI_LYWSD03_NOT_FOUND;
+        case XIAOMI_REGISTRY_ALREADY_EXISTS: return XIAOMI_LYWSD03_ALREADY_EXISTS;
+        case XIAOMI_REGISTRY_FULL: return XIAOMI_LYWSD03_FULL;
+        case XIAOMI_REGISTRY_INVALID_ARGUMENT: return XIAOMI_LYWSD03_INVALID_ARGUMENT;
+        case XIAOMI_REGISTRY_NOT_INITIALIZED: return XIAOMI_LYWSD03_NOT_INITIALIZED;
+        case XIAOMI_REGISTRY_BUSY: return XIAOMI_LYWSD03_BUSY;
+        case XIAOMI_REGISTRY_STORAGE_ERROR: return XIAOMI_LYWSD03_STORAGE_ERROR;
+        default: return XIAOMI_LYWSD03_STORAGE_ERROR;
+    }
 }
 
 
