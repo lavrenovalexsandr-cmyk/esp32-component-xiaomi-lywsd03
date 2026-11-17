@@ -69,7 +69,7 @@ xiaomi_lywsd03_result_t xiaomi_lywsd03_get_sensor_ex(
     size_t index, xiaomi_lywsd03_sensor_info_t *sensor);
 ```
 
-Results distinguish OK, NOT_FOUND, ALREADY_EXISTS, FULL, INVALID_ARGUMENT, NOT_INITIALIZED, and STORAGE_ERROR.
+Results distinguish OK, NOT_FOUND, ALREADY_EXISTS, FULL, INVALID_ARGUMENT, NOT_INITIALIZED, and BUSY, and STORAGE_ERROR.
 
 Adding a sensor never replaces an existing key. If the MAC is already registered, the function returns ALREADY_EXISTS. To replace a key, the application must explicitly remove the sensor and then add it again. This prevents duplicate MQTT delivery from silently overwriting a stored key.
 
