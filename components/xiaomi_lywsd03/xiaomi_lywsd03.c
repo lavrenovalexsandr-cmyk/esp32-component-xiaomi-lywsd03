@@ -561,16 +561,16 @@ static bool xiaomi_lywsd03_parse(
      * Если датчик ещё не добавлен —
      * расшифровка вообще не выполняется.
      */
-    uint8_t key[XIAOMI_BIND_KEY_SIZE];
+    uint8_t key[XIAOMI_BIND_KEY_SIZE] = {0};
+    xiaomi_registry_result_t key_result = xiaomi_registry_find_key(mac, key);
 
-    if(!xiaomi_registry_find_key(
-            mac,
-            key))
+    if(key_result != XIAOMI_REGISTRY_OK)
     {
-        ESP_LOGW(
-            TAG,
-            "No BLE key configured for this sensor");
-
+        if(key_result == XIAOMI_REGISTRY_NOT_FOUND)
+            ESP_LOGW(TAG, "No BLE key configured for this sensor");
+        else
+            ESP_LOGE(TAG, "Failed to read sensor key from registry");
+        secure_zero(key, sizeof(key));
         return false;
     }
 
