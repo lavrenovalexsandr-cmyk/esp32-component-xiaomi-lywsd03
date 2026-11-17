@@ -675,7 +675,7 @@ static void *s_data_callback_context;
 
 esp_err_t xiaomi_lywsd03_init(void)
 {
-    if (!xiaomi_registry_init()) {
+    if (xiaomi_registry_init() != XIAOMI_REGISTRY_OK) {
         return ESP_FAIL;
     }
 
