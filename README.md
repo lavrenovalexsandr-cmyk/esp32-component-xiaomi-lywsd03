@@ -45,29 +45,35 @@ void xiaomi_lywsd03_set_callback(xiaomi_lywsd03_data_callback_t callback, void *
 
 Приложение обязано инициализировать NVS до вызова xiaomi_lywsd03_init().
 
-### Регистрация датчика
+### Управление реестром датчиков
 
-Bind-key должен содержать ровно 16 байт. MAC передаётся в обычном порядке байтов, как при записи адреса.
+Bind-key должен содержать ровно 16 байт. MAC передаётся в обычном порядке байтов.
+
+Для управления реестром рекомендуется использовать функции с подробным результатом:
 
 ```c
-uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE] = {0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6};
-uint8_t key[XIAOMI_LYWSD03_BIND_KEY_SIZE] = { /* 16 байт bind-key */ };
-bool added = xiaomi_lywsd03_add_sensor(mac, key);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_add_sensor_ex(
+    const uint8_t mac[6], const uint8_t key[16]);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_remove_sensor_ex(
+    const uint8_t mac[6]);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_has_key_ex(
+    const uint8_t mac[6]);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_sensor_count_ex(size_t *count);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_get_sensor_ex(
+    size_t index, xiaomi_lywsd03_sensor_info_t *sensor);
 ```
 
-Если MAC уже зарегистрирован, xiaomi_lywsd03_add_sensor() заменяет сохранённый ключ. Удаление выполняется через xiaomi_lywsd03_remove_sensor().
+Возможные результаты: `OK`, `NOT_FOUND`, `ALREADY_EXISTS`, `FULL`, `INVALID_ARGUMENT`, `NOT_INITIALIZED`, `STORAGE_ERROR`.
 
-Другие функции API:
-- xiaomi_lywsd03_has_key(mac) — проверить наличие ключа;
-- xiaomi_lywsd03_sensor_count() — получить количество датчиков;
-- xiaomi_lywsd03_get_sensor(index, &info) — получить MAC по индексу;
-- xiaomi_lywsd03_is_packet(packet) — проверить, относится ли реклама к LYWSD03MMC;
-- xiaomi_lywsd03_get_info(packet, mac) — извлечь MAC из MiBeacon;
-- xiaomi_lywsd03_process_adv(packet) — обработать рекламный пакет.
+**Добавление не заменяет существующий ключ.** Если MAC уже зарегистрирован, функция возвращает `ALREADY_EXISTS`. Для замены ключа приложение должно явно выполнить удаление, затем добавление. Это защищает от случайной перезаписи ключа при повторной доставке MQTT-команды.
 
-Публичный API намеренно не предоставляет чтение bind-key обратно. Ключ используется внутри компонента для расшифровки.
+Старые bool/size_t-функции сохранены для совместимости. Они сворачивают подробные состояния ошибок в false или 0; для новых интеграций используйте API с суффиксом `_ex`.
 
-Реестр хранится в NVS namespace xiaomi. Формат хранения совместим с проверенной реализацией из [esp32_mqtt_xiaomi_lywsd03](https://github.com/lavrenovalexsandr-cmyk/esp32-firmware-xiaomi-lywsd03).
+Реестр защищён mutex: операции чтения, добавления, удаления и перечисления не выполняются одновременно. Ошибка чтения отдельной записи считается ошибкой хранилища, а не отсутствием датчика. В случае ошибки перечисление не должно интерпретироваться как пустой реестр.
+
+Публичный API намеренно не предоставляет чтение bind-key обратно. Ключ используется внутри компонента для расшифровки; временные копии ключа и plaintext очищаются после использования.
+
+Реестр хранится в NVS namespace `xiaomi`. Формат хранения записей не изменён, поэтому существующие данные совместимы с этой версией компонента.
 
 ### Измерения
 
