@@ -267,7 +267,7 @@ static xiaomi_registry_result_t recover_remove_journal_unlocked(void)
 xiaomi_registry_result_t xiaomi_registry_init(void)
 {
     if (s_initialized) {
-        return XIAOMI_REGISTRY_OK;
+        return s_faulted ? XIAOMI_REGISTRY_STORAGE_ERROR : XIAOMI_REGISTRY_OK;
     }
 
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &s_nvs_handle);
