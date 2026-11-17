@@ -30,10 +30,13 @@ static void secure_zero(void *ptr, size_t len)
     }
 }
 
-static bool lock_registry(void)
+static xiaomi_registry_result_t lock_registry(void)
 {
-    return s_initialized && s_mutex != NULL &&
-           xSemaphoreTake(s_mutex, portMAX_DELAY) == pdTRUE;
+    if (!s_initialized || s_mutex == NULL) {
+        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    }
+    return xSemaphoreTake(s_mutex, pdMS_TO_TICKS(100)) == pdTRUE
+        ? XIAOMI_REGISTRY_OK : XIAOMI_REGISTRY_BUSY;
 }
 
 static void unlock_registry(void)
@@ -189,8 +192,9 @@ xiaomi_registry_result_t xiaomi_registry_find_key(
     if (mac == NULL || key == NULL) {
         return XIAOMI_REGISTRY_INVALID_ARGUMENT;
     }
-    if (!lock_registry()) {
-        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    xiaomi_registry_result_t lock_result = lock_registry();
+    if (lock_result != XIAOMI_REGISTRY_OK) {
+        return lock_result;
     }
 
     size_t count = 0;
@@ -221,8 +225,9 @@ xiaomi_registry_result_t xiaomi_registry_add(
     if (mac == NULL || key == NULL) {
         return XIAOMI_REGISTRY_INVALID_ARGUMENT;
     }
-    if (!lock_registry()) {
-        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    xiaomi_registry_result_t lock_result = lock_registry();
+    if (lock_result != XIAOMI_REGISTRY_OK) {
+        return lock_result;
     }
 
     size_t count = 0;
@@ -275,8 +280,9 @@ xiaomi_registry_result_t xiaomi_registry_remove(const uint8_t mac[6])
     if (mac == NULL) {
         return XIAOMI_REGISTRY_INVALID_ARGUMENT;
     }
-    if (!lock_registry()) {
-        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    xiaomi_registry_result_t lock_result = lock_registry();
+    if (lock_result != XIAOMI_REGISTRY_OK) {
+        return lock_result;
     }
 
     size_t count = 0;
@@ -336,8 +342,9 @@ xiaomi_registry_result_t xiaomi_registry_count(size_t *count)
     if (count == NULL) {
         return XIAOMI_REGISTRY_INVALID_ARGUMENT;
     }
-    if (!lock_registry()) {
-        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    xiaomi_registry_result_t lock_result = lock_registry();
+    if (lock_result != XIAOMI_REGISTRY_OK) {
+        return lock_result;
     }
     xiaomi_registry_result_t result = get_count_unlocked(count);
     unlock_registry();
@@ -350,8 +357,9 @@ xiaomi_registry_result_t xiaomi_registry_get(
     if (entry == NULL) {
         return XIAOMI_REGISTRY_INVALID_ARGUMENT;
     }
-    if (!lock_registry()) {
-        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    xiaomi_registry_result_t lock_result = lock_registry();
+    if (lock_result != XIAOMI_REGISTRY_OK) {
+        return lock_result;
     }
 
     size_t count = 0;
