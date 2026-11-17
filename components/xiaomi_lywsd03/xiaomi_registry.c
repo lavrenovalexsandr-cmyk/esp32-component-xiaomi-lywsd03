@@ -447,6 +447,8 @@ xiaomi_registry_result_t xiaomi_registry_remove(const uint8_t mac[6])
             }
             if (err != ESP_OK) {
                 ESP_LOGE(TAG, "Failed to persist remove journal: %s", esp_err_to_name(err));
+                // Commit failure can leave the durable state uncertain.
+                s_faulted = true;
                 result = XIAOMI_REGISTRY_STORAGE_ERROR;
             } else {
                 result = apply_remove_journal_unlocked(&journal);
