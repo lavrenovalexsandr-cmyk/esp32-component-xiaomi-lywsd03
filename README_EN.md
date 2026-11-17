@@ -55,7 +55,29 @@ uint8_t key[XIAOMI_LYWSD03_BIND_KEY_SIZE] = { /* 16-byte bind key */ };
 bool added = xiaomi_lywsd03_add_sensor(mac, key);
 ```
 
-If the MAC is already registered, xiaomi_lywsd03_add_sensor() replaces its stored key. Use xiaomi_lywsd03_remove_sensor() to remove a sensor.
+The recommended registry API uses status-returning functions:
+
+```c
+xiaomi_lywsd03_result_t xiaomi_lywsd03_add_sensor_ex(
+    const uint8_t mac[6], const uint8_t key[16]);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_remove_sensor_ex(
+    const uint8_t mac[6]);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_has_key_ex(
+    const uint8_t mac[6]);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_sensor_count_ex(size_t *count);
+xiaomi_lywsd03_result_t xiaomi_lywsd03_get_sensor_ex(
+    size_t index, xiaomi_lywsd03_sensor_info_t *sensor);
+```
+
+Results distinguish OK, NOT_FOUND, ALREADY_EXISTS, FULL, INVALID_ARGUMENT, NOT_INITIALIZED, BUSY, and STORAGE_ERROR.
+
+Adding a sensor never replaces an existing key. If the MAC is already registered, the function returns ALREADY_EXISTS. To replace a key, the application must explicitly remove the sensor and then add it again. This prevents duplicate MQTT delivery from silently overwriting a stored key.
+
+Legacy bool/size_t functions remain available for source compatibility, but collapse detailed errors into false or zero. New integrations should use the `_ex` API.
+
+Registry operations are protected by a mutex. A failed read of an existing entry is treated as a storage error, never as a missing sensor. Enumeration errors must not be interpreted as an empty registry.
+
+The public API does not expose bind keys for reading. Temporary key and plaintext buffers are cleared after use. The registry remains in NVS namespace `xiaomi`; the stored entry format is unchanged for compatibility with existing data. Sensor removal uses an NVS recovery journal: an interrupted removal is completed during the next initialization. If the journal is corrupt or recovery cannot complete, initialization returns `STORAGE_ERROR` and the registry remains unavailable.
 
 Other available functions:
 - xiaomi_lywsd03_has_key(mac) — check whether a key is registered;
