@@ -69,7 +69,7 @@ xiaomi_lywsd03_result_t xiaomi_lywsd03_get_sensor_ex(
     size_t index, xiaomi_lywsd03_sensor_info_t *sensor);
 ```
 
-Results distinguish OK, NOT_FOUND, ALREADY_EXISTS, FULL, INVALID_ARGUMENT, NOT_INITIALIZED, and BUSY, and STORAGE_ERROR.
+Results distinguish OK, NOT_FOUND, ALREADY_EXISTS, FULL, INVALID_ARGUMENT, NOT_INITIALIZED, BUSY, and STORAGE_ERROR.
 
 Adding a sensor never replaces an existing key. If the MAC is already registered, the function returns ALREADY_EXISTS. To replace a key, the application must explicitly remove the sensor and then add it again. This prevents duplicate MQTT delivery from silently overwriting a stored key.
 
@@ -77,7 +77,7 @@ Legacy bool/size_t functions remain available for source compatibility, but coll
 
 Registry operations are protected by a mutex. A failed read of an existing entry is treated as a storage error, never as a missing sensor. Enumeration errors must not be interpreted as an empty registry.
 
-The public API does not expose bind keys for reading. Temporary key and plaintext buffers are cleared after use. The registry remains in NVS namespace `xiaomi`; the stored entry format is unchanged for compatibility with existing data.
+The public API does not expose bind keys for reading. Temporary key and plaintext buffers are cleared after use. The registry remains in NVS namespace `xiaomi`; the stored entry format is unchanged for compatibility with existing data. Sensor removal uses an NVS recovery journal: an interrupted removal is completed during the next initialization. If the journal is corrupt or recovery cannot complete, initialization returns `STORAGE_ERROR` and the registry remains unavailable.
 
 Other available functions:
 - xiaomi_lywsd03_has_key(mac) — check whether a key is registered;
