@@ -585,6 +585,7 @@ static bool xiaomi_lywsd03_parse(
             "MiBeacon packet is not encrypted, FC=0x%04X",
             frame_control);
 
+        secure_zero(key, sizeof(key));
         return false;
     }
 
@@ -596,11 +597,12 @@ static bool xiaomi_lywsd03_parse(
             "Encrypted MiBeacon packet too short: %u",
             (unsigned)mi_len);
 
+        secure_zero(key, sizeof(key));
         return false;
     }
 
 
-    uint8_t plaintext[64];
+    uint8_t plaintext[64] = {0};
 
     size_t plaintext_len = 0;
 
@@ -613,14 +615,18 @@ static bool xiaomi_lywsd03_parse(
             sizeof(plaintext),
             &plaintext_len))
     {
+        secure_zero(key, sizeof(key));
+        secure_zero(plaintext, sizeof(plaintext));
         return false;
     }
 
+    secure_zero(key, sizeof(key));
 
     parse_plaintext(
         plaintext,
         plaintext_len,
         data);
+    secure_zero(plaintext, sizeof(plaintext));
 
 
     /*
