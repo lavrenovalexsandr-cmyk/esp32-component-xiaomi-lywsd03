@@ -10,6 +10,17 @@
 
 #include "xiaomi_registry.h"
 
+static void secure_zero(void *ptr, size_t len)
+{
+    volatile uint8_t *p = (volatile uint8_t *)ptr;
+    while (len-- > 0) { *p++ = 0; }
+}
+
+static xiaomi_lywsd03_result_t map_registry_result(xiaomi_registry_result_t result)
+{
+    return (xiaomi_lywsd03_result_t)result;
+}
+
 
 static const char *TAG = "XIAOMI";
 
@@ -128,21 +139,19 @@ bool xiaomi_lywsd03_is_packet(
 }
 
 
-bool xiaomi_lywsd03_has_key(
-        const uint8_t mac[6])
+xiaomi_lywsd03_result_t xiaomi_lywsd03_has_key_ex(const uint8_t mac[6])
 {
-    if(mac == NULL)
-    {
-        return false;
-    }
-
-    uint8_t key[XIAOMI_BIND_KEY_SIZE];
-
-    return xiaomi_registry_find_key(
-        mac,
-        key);
+    if (mac == NULL) return XIAOMI_LYWSD03_INVALID_ARGUMENT;
+    uint8_t key[XIAOMI_BIND_KEY_SIZE] = {0};
+    xiaomi_registry_result_t result = xiaomi_registry_find_key(mac, key);
+    secure_zero(key, sizeof(key));
+    return map_registry_result(result);
 }
 
+bool xiaomi_lywsd03_has_key(const uint8_t mac[6])
+{
+    return xiaomi_lywsd03_has_key_ex(mac) == XIAOMI_LYWSD03_OK;
+}
 
 /* -------------------------------------------------------------------------- */
 /* AES-CCM                                                                    */
@@ -703,38 +712,54 @@ bool xiaomi_lywsd03_process_adv(
     return true;
 }
 
-bool xiaomi_lywsd03_add_sensor(
-    const uint8_t mac[6],
-    const uint8_t key[XIAOMI_BIND_KEY_SIZE])
+xiaomi_lywsd03_result_t xiaomi_lywsd03_add_sensor_ex(
+    const uint8_t mac[6], const uint8_t key[XIAOMI_BIND_KEY_SIZE])
 {
-    return xiaomi_registry_add(mac, key);
+    return map_registry_result(xiaomi_registry_add(mac, key));
+}
+
+xiaomi_lywsd03_result_t xiaomi_lywsd03_remove_sensor_ex(const uint8_t mac[6])
+{
+    return map_registry_result(xiaomi_registry_remove(mac));
+}
+
+xiaomi_lywsd03_result_t xiaomi_lywsd03_sensor_count_ex(size_t *count)
+{
+    return map_registry_result(xiaomi_registry_count(count));
+}
+
+xiaomi_lywsd03_result_t xiaomi_lywsd03_get_sensor_ex(
+    size_t index, xiaomi_lywsd03_sensor_info_t *sensor)
+{
+    if (sensor == NULL) return XIAOMI_LYWSD03_INVALID_ARGUMENT;
+    xiaomi_registry_entry_t entry;
+    xiaomi_registry_result_t result = xiaomi_registry_get(index, &entry);
+    if (result == XIAOMI_REGISTRY_OK) {
+        memcpy(sensor->mac, entry.mac, sizeof(sensor->mac));
+    }
+    secure_zero(&entry, sizeof(entry));
+    return map_registry_result(result);
+}
+
+bool xiaomi_lywsd03_add_sensor(
+    const uint8_t mac[6], const uint8_t key[XIAOMI_BIND_KEY_SIZE])
+{
+    return xiaomi_lywsd03_add_sensor_ex(mac, key) == XIAOMI_LYWSD03_OK;
 }
 
 bool xiaomi_lywsd03_remove_sensor(const uint8_t mac[6])
 {
-    return xiaomi_registry_remove(mac);
+    return xiaomi_lywsd03_remove_sensor_ex(mac) == XIAOMI_LYWSD03_OK;
 }
 
 size_t xiaomi_lywsd03_sensor_count(void)
 {
-    return xiaomi_registry_count();
+    size_t count = 0;
+    return xiaomi_lywsd03_sensor_count_ex(&count) == XIAOMI_LYWSD03_OK ? count : 0;
 }
 
 bool xiaomi_lywsd03_get_sensor(
-    size_t index,
-    xiaomi_lywsd03_sensor_info_t *sensor)
+    size_t index, xiaomi_lywsd03_sensor_info_t *sensor)
 {
-    if (sensor == NULL) {
-        return false;
-    }
-
-    xiaomi_registry_entry_t entry;
-    if (!xiaomi_registry_get(index, &entry)) {
-        return false;
-    }
-
-    memcpy(sensor->mac, entry.mac, sizeof(sensor->mac));
-    memset(entry.key, 0, sizeof(entry.key));
-    return true;
+    return xiaomi_lywsd03_get_sensor_ex(index, sensor) == XIAOMI_LYWSD03_OK;
 }
-
