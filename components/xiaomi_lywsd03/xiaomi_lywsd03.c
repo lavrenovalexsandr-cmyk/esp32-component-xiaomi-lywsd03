@@ -739,6 +739,11 @@ xiaomi_lywsd03_result_t xiaomi_lywsd03_remove_sensor_ex(const uint8_t mac[6])
     return map_registry_result(xiaomi_registry_remove(mac));
 }
 
+xiaomi_lywsd03_result_t xiaomi_lywsd03_clear_registry(void)
+{
+    return map_registry_result(xiaomi_registry_clear());
+}
+
 xiaomi_lywsd03_result_t xiaomi_lywsd03_sensor_count_ex(size_t *count)
 {
     return map_registry_result(xiaomi_registry_count(count));

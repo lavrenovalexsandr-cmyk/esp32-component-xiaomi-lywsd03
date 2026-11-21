@@ -504,3 +504,38 @@ xiaomi_registry_result_t xiaomi_registry_get(
     unlock_registry();
     return result;
 }
+
+
+/*
+ * Factory Reset must be able to recover even when normal registry access is
+ * blocked by a damaged/incomplete removal journal. Erase only this component's
+ * namespace; the shared NVS partition is owned by Platform Core as well.
+ */
+xiaomi_registry_result_t xiaomi_registry_clear(void)
+{
+    if (!s_initialized || s_mutex == NULL) {
+        return XIAOMI_REGISTRY_NOT_INITIALIZED;
+    }
+    if (xSemaphoreTake(s_mutex, pdMS_TO_TICKS(100)) != pdTRUE) {
+        return XIAOMI_REGISTRY_BUSY;
+    }
+
+    esp_err_t err = nvs_erase_all(s_nvs_handle);
+    if (err == ESP_OK) {
+        err = nvs_commit(s_nvs_handle);
+    }
+
+    xiaomi_registry_result_t result = XIAOMI_REGISTRY_OK;
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Factory Reset failed to clear Xiaomi registry: %s",
+                 esp_err_to_name(err));
+        s_faulted = true;
+        result = XIAOMI_REGISTRY_STORAGE_ERROR;
+    } else {
+        s_faulted = false;
+        ESP_LOGI(TAG, "Xiaomi registry and bind keys cleared");
+    }
+
+    (void)xSemaphoreGive(s_mutex);
+    return result;
+}

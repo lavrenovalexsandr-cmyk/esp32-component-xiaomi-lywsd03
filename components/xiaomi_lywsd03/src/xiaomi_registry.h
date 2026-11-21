@@ -33,6 +33,7 @@ xiaomi_registry_result_t xiaomi_registry_add(
     const uint8_t mac[6],
     const uint8_t key[XIAOMI_BIND_KEY_SIZE]);
 xiaomi_registry_result_t xiaomi_registry_remove(const uint8_t mac[6]);
+xiaomi_registry_result_t xiaomi_registry_clear(void);
 xiaomi_registry_result_t xiaomi_registry_count(size_t *count);
 xiaomi_registry_result_t xiaomi_registry_get(
     size_t index,
