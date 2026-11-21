@@ -63,6 +63,8 @@ xiaomi_lywsd03_result_t xiaomi_lywsd03_add_sensor_ex(
     const uint8_t key[XIAOMI_LYWSD03_BIND_KEY_SIZE]);
 xiaomi_lywsd03_result_t xiaomi_lywsd03_remove_sensor_ex(
     const uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE]);
+/** Clear all persisted Xiaomi sensor records and bind keys. */
+xiaomi_lywsd03_result_t xiaomi_lywsd03_clear_registry(void);
 xiaomi_lywsd03_result_t xiaomi_lywsd03_has_key_ex(
     const uint8_t mac[XIAOMI_LYWSD03_MAC_SIZE]);
 xiaomi_lywsd03_result_t xiaomi_lywsd03_sensor_count_ex(size_t *count);
